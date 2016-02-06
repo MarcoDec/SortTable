@@ -157,31 +157,96 @@ Function0.prototype.getTypes = function() {
     }
 }
 
+
+/*
+*   Réinitialise les glyphicones des colonnes ne contenant pas currentSpan
+*   Et renvoie l'indice du tableau contenant currentSpan
+*/
 Function0.prototype.resetOtherSpan= function(currentSpan) {
     // on parcourt les headers et pour chaque span différent de currentSpan on remet le glyphicon à f0.c
     // 1.détermination de l'indice du tableau considéré
     // 2.parcours des headers de ce tableau
     // 3.extration et comparaison du span du header avec currentSpan
     // 4.Si identique, on ne fait rien, sinon on redéfinit la classe du span à f0.c
-    console.log(currentSpan.parentElement.innerHTML);
     var indice=-1;
+    var colonne=-1;
     for (var i=0; i<this.headers.length;i++) { //-> Tableau
         for (var j=0; j<this.headers[i].length; j++) {
             if (this.headers[i][j]===currentSpan.parentElement) {
                 indice=i;
-                console.log("!--> Span trouvé dans le tableau n°"+indice);
+                colonne=j;
                 break;
             }
         }
-        if (indice!=-1) { break;}
+        if (indice!=-1) { 
+            break;
+        }
     }
     for (var i=0; i<this.headers[indice].length; i++) {
         var span = this.headers[indice][i].getElementsByTagName('span')[0];
         if (span!=currentSpan) {
-            $(mySpan).attr('class',f0.c);
+            span.className=f0.c;
         }
     }
+    return { index_T: indice,
+             index_c: colonne};
 }
+
+/*  
+*   getDate(strDate) convertit strDate en date 
+*   (suppose que isDate ait été exécutée avant)
+*/
+var getDate = function (strDate){	  
+	    day = strDate.substring(0,2);
+		month = strDate.substring(3,5);
+		year = strDate.substring(6,10);
+		d = new Date();
+		d.setDate(day);
+		d.setMonth(month);
+		d.setFullYear(year); 
+		return d;  
+	  }
+
+// fonction de tri croissant
+var myArraySort=function(a,b) {
+ if (isDate(a[0])&&(isDate(b[0])))  {
+     diff = getDate(a[0]).getTime()-getDate(b[0]).getTime();
+     return (diff==0?diff:diff/Math.abs(diff));
+ } else if (isNumber(a[0])&&isNumber(b[0])) {
+     var a_num=Number(a[0].replace(",","."));
+     var b_num=Number(b[0].replace(",","."));
+     if (a_num<b_num) {
+         return -1;
+     } else if (b_num<a_num) {
+         return 1;
+     } else { return 0;}
+ } else {
+     //  é,è,ê,ë => remplacés par la lettre e pour le tri
+     var a_string = a[0].replace(/[éèêë]/,"e");
+     var b_string = b[0].replace(/[éèêë]/,"e");
+     // à, â, ä => remplacés par la lettre a pour le tri
+     a_string=a_string.replace(/[àâä]/,"a");
+     b_string=b_string.replace(/[àâä]/,"a");
+     // ù, û, ü => remplacés par la lettre u pour le tri
+     a_string=a_string.replace(/[ùûü]/,"u");
+     b_string=b_string.replace(/[ùûü]/,"u");
+     // î, ï => remplacés par la lettre i pour le tri
+     a_string=a_string.replace(/[îï]/,"i");
+     b_string=b_string.replace(/[îï]/,"i");
+     // ô, ö => remplacés par la lettre o pour le tri
+     a_string=a_string.replace(/[ôö]/,"o");
+     b_string=b_string.replace(/[ôö]/,"o");
+     
+     console.log('a: '+a[0]+'->'+a_string);
+     console.log('b: '+b[0]+'->'+b_string);
+      if (a_string<b_string) {
+          return -1;
+      }  else if (b_string<a_string) {
+          return 1;
+      } else { return 0;}
+  }
+};
+
 /*
 *   Ajoute les balises span de glyhicon dans chacun des titres des tableaux
 *
@@ -193,12 +258,29 @@ Function0.prototype.setGlyphicons = function() {
     */
     function filterOnClick(e) {
         mySpan=e.target;
-        f0.resetOtherSpan(mySpan);
+        var indices = f0.resetOtherSpan(mySpan);
+        
+        // création du tableau à trier
+        var theTable= new Array();
+        // la 1ère colonne de ce tableau contiendra la valeur de la colonne à trier
+        // la 2ième colonne de ce tableau contiendra la ligne elle-même <tr>
+        for (var i=0; i<f0.lines[indices.index_T].length; i++) {
+            var valueC = f0.lines[indices.index_T][i].getElementsByTagName("td")[indices.index_c].textContent;
+            theTable.push([valueC,f0.lines[indices.index_T][i]]);
+        }
+        // A ce stade, la commande 
+        //      theTable.sort(myArraySort); 
+        // trierait le tableau de façon croissante
+        // Et l'ajout ensuite de la commande 
+        //      theTable.reverse();
+        // trierait finalement le tableau de façon décroissante
+        theTable.sort(myArraySort);
         var classSpan = mySpan.className;
         switch (classSpan) { // c -> (a ou d) -> (b ou e) -> c
             case f0.a:
                 // on supprime la classe f0.a et on ajoute la classe f0.b
                 $(mySpan).removeClass(f0.a).addClass(f0.b);
+                theTable.reverse();
                 break;
             case f0.b:
                 // on supprime la classe f0.b et on ajoute la classe f0.c
@@ -214,6 +296,7 @@ Function0.prototype.setGlyphicons = function() {
             case f0.d:
                 // on supprime la classe f0.d et on ajoute la classe f0.e
                 $(mySpan).removeClass(f0.d).addClass(f0.e);
+                theTable.reverse();
                 break;
             case f0.e:
                 // on supprime la classe f0.e et on ajoute la classe f0.c
@@ -222,6 +305,17 @@ Function0.prototype.setGlyphicons = function() {
             default:
                 console.log('defaut');
         }
+        //console.log("!---> Tableau trié ");
+        //console.log(theTable);
+        //Maintenant il est temps de modifier le DOM comme il convient ! :)
+        var tbody=f0.tables[indices.index_T].getElementsByTagName('tbody')[0];
+        trs=tbody.getElementsByTagName("tr");
+        for (var i=0; i<trs.length; i++) {
+            $(trs[i]).remove();
+        }
+        for (var i=0; i<theTable.length; i++) {
+            $(tbody).append(theTable[i][1]);
+        }    
     }
     for (var i=0; i<this.headers.length; i++) { //parcours des tableaux => i
         var ths=this.headers[i];
@@ -245,34 +339,7 @@ Function0.prototype.init = function(className){
     this.setGlyphicons();
 }
 
-/*  
-*   getDate(strDate) convertit strDate en date 
-*   (suppose que isDate ait été exécutée avant)
-*/
-var getDate = function (strDate){	  
-	    day = strDate.substring(0,2);
-		month = strDate.substring(3,5);
-		year = strDate.substring(6,10);
-		d = new Date();
-		d.setDate(day);
-		d.setMonth(month);
-		d.setFullYear(year); 
-		return d;  
-	  }
 
-// fonction de tri croissant
-var myArraySort=function(a,b) {
- if (isDate(a[0])&&(isDate(b[0])))  {
-     diff = getDate(a[0]).getTime()-getDate(b[0]).getTime();
-     return (diff==0?diff:diff/Math.abs(diff));
- } else {
-      if (a[0]<b[0]) {
-          return -1;
-      }  else if (b[0]<a[0]) {
-          return 1;
-      } else { return 0;}
-  }
-};
 
 
 
