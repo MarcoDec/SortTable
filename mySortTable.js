@@ -196,15 +196,14 @@ Function0.prototype.resetOtherSpan= function(currentSpan) {
 *   getDate(strDate) convertit strDate en date 
 *   (suppose que isDate ait été exécutée avant)
 */
-var getDate = function (strDate){	  
-	    day = strDate.substring(0,2);
-		month = strDate.substring(3,5);
-		year = strDate.substring(6,10);
-		d = new Date();
-		d.setDate(day);
-		d.setMonth(month);
-		d.setFullYear(year); 
-		return d;  
+var getDate = function (strDate){
+    var myRegExpDate = /(\d{2})[./-](\d{2})[./-](\d{4})/;//jj-mm-aaaa
+    myRegExpDate.exec(strDate);
+    day=Number(RegExp.$1);
+    month=Number(RegExp.$2);
+    year=Number(RegExp.$3);
+    d = new Date(year,month, day);
+    return d;  
 	  }
 
 // fonction de tri croissant
