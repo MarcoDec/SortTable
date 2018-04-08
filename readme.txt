@@ -1,5 +1,5 @@
 # Welcome !
-
+===========
 This git repository contains a JS library 'mySortTable' with an example that you can see by opening 'index.html'.
 
 This library requires :
@@ -11,6 +11,7 @@ The aim of this 'mySortTable' is to integrate in one js file the sorting functio
 - an html 5 table with AJAX (not yet started)
 
 # Integration
+=============
 Add mySortTable.js after JQuery integration script.
 ```HTML
 <script src="mySortTable.js"></script></code>
