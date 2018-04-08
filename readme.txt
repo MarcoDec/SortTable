@@ -1,4 +1,4 @@
-Welcome !
+#H1 Welcome !
 
 This git repository contains a JS library 'mySortTable' with an example that you can see by opening 'index.html'.
 
@@ -10,9 +10,13 @@ The aim of this 'mySortTable' is to integrate in one js file the sorting functio
 - an html 5 table without AJAX links (in-progress),
 - an html 5 table with AJAX (not yet started)
 
-<h1>Integration</h1>
+# H1 Integration
 Add mySortTable.js after JQuery integration script.
-<code><script src="mySortTable.js"></script></code>
+```HTML
+<script src="mySortTable.js"></script></code>
+```
 
 Add class md-sortable to the table that have to be sortable
-<code><table class="md-sortable"></code>
+```HTML
+<table class="md-sortable">
+```
